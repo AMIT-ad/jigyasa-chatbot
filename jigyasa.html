@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>Jigyasa Chatbot</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: 'Segoe UI', sans-serif;
+      color: #00ffcc;
+      transition: all 0.3s ease;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .chat-box {
+      flex: 1;
+      background: #111;
+      padding: 20px;
+      overflow-y: auto;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .chat-box p {
+      margin: 5px 0;
+    }
+
+    .user {
+      color: #6ae3ff;
+    }
+
+    .bot {
+      color: #ff82e9;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 16px;
+      font-size: 18px;
+      background: #222;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+
+    button, .mic-btn {
+      padding: 16px;
+      background: #cc33ff;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .avatar {
+      width: 150px;
+      margin: 0 auto 10px;
+      display: block;
+      border-radius: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: white;
+    }
+
+    .footer a {
+      color: #00ffcc;
+      text-decoration: none;
+    }
+
+    .reactions button {
+      background: transparent;
+      font-size: 20px;
+      margin-right: 8px;
+      cursor: pointer;
+      border: none;
+    }
+
+    #listeningStatus {
+      text-align: center;
+      color: yellow;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .light-mode {
+      background: #fff;
+      color: #000;
+    }
+
+    .light-mode .chat-box {
+      background: #f0f0f0;
+    }
+
+    .light-mode .user {
+      color: #004d99;
+    }
+
+    .light-mode .bot {
+      color: #cc00cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <img src="jigyasa_avatar.gif" alt="Jigyasa Avatar" class="avatar">
+
+    <div class="options">
+      <label><input type="checkbox" id="voiceToggle" checked> Voice Response</label>
+
+      <select id="personality">
+        <option value="normal">Normal</option>
+        <option value="friendly">Friendly</option>
+        <option value="teacher">Teacher</option>
+      </select>
+
+      <select id="mood">
+        <option value="">Mood</option>
+        <option value="happy">😊 Happy</option>
+        <option value="sad">😔 Sad</option>
+        <option value="angry">😠 Angry</option>
+      </select>
+
+      <button onclick="setVoice('male')">👨 Male</button>
+      <button onclick="setVoice('female')">👩 Female</button>
+      <button onclick="toggleTheme()">🌗 Theme</button>
+      <button onclick="saveChatAsPDF()">🧾 Save PDF</button>
+      <button onclick="tellStory()">📚 Random Story</button>
+      <button onclick="addCustomQA()">➕ Add Q&A</button>
+      <button onclick="openFeedbackForm()">📝 Feedback</button>
+    </div>
+
+    <div id="listeningStatus">🎤 Listening...</div>
+
+    <div class="chat-box" id="chat"></div>
+
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Type or speak..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()">Send</button>
+      <button class="mic-btn" id="micButton">🎤</button>
+    </div>
+
+    <div class="footer">
+      <b>For More GPTs Visit: <a href="https://sites.google.com/view/custom-gpt-store/home" target="_blank">GPT Store</a></b>
+    </div>
+  </div>
+
+  <script>
+    const qa = {
+      "hello": "hello! hello sir।",
+      "how are you": "i am fine sir!",
+      "whats your name": "my name is jigyasa।",
+      "bye": "by sir।",
+      "how made you": "mujhe create karne wale ka naam amitdhakad hai",
+      "thank you jigyas": "jigyasa khush hui!",
+      "open google": "आप इस लिंक से Google खोल सकते हैं: https://www.google.com",
+      "what is ai": "ai ka matalab hai Artificial intelligence।"
+    };
+
+    let customQA = JSON.parse(localStorage.getItem('customQA')) || {};
+
+    const stories = [
+      "ek samay kee baat hai, ek raaja tha jo nyaayapriy tha...",
+      "ek nanhee chidiya roj apane bachchon ke lie khaana laatee thee...",
+      "ek jangal mein sabhee jaanavar milakar tyohaar manaate the..."
+    ];
+
+    const moodGIFs = {
+      happy: "https://media.giphy.com/media/yoJC2A59OCZHs1LXvW/giphy.gif",
+      sad: "https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif",
+      angry: "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif"
+    };
+
+    let selectedVoiceType = 'female';
+    let isDarkMode = true;
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const chat = document.getElementById('chat');
+      const voiceToggle = document.getElementById('voiceToggle');
+      const mood = document.getElementById('mood').value;
+      const personality = document.getElementById('personality').value;
+
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      chat.innerHTML += `<p class="user">🧑‍💻 You: ${userText}</p>`;
+
+      let response = "माफ कीजिए, मैं समझ नहीं पाई।";
+
+      for (let q in qa) {
+        if (userText.toLowerCase().includes(q)) {
+          response = qa[q];
+          break;
+        }
+      }
+
+      for (let q in customQA) {
+        if (userText.toLowerCase().includes(q)) {
+          response = customQA[q];
+          break;
+        }
+      }
+
+      if (personality === 'friendly') response = `😊 ज़रूर! ${response}`;
+      if (personality === 'teacher') response = `📚 ध्यान से सुनिए... ${response}`;
+
+      if (mood === 'happy') response = `😄 ${response}`;
+      else if (mood === 'sad') response = `😔 ${response}`;
+      else if (mood === 'angry') response = `😠 ${response}`;
+
+      if (mood && moodGIFs[mood]) {
+        response += `<br><img src="${moodGIFs[mood]}" width="120" style="margin-top:8px;border-radius:10px;">`;
+      }
+
+      const id = Date.now();
+      chat.innerHTML += `<p class="bot" id="bot-${id}">🤖 Jigyasa: ${response}</p>
+                         <div class="reactions">
+                          <button onclick="react('${response}','👍')">👍</button>
+                          <button onclick="react('${response}','👎')">👎</button>
+                          <button onclick="react('${response}','❤️')">❤️</button>
+                         </div>`;
+      chat.scrollTop = chat.scrollHeight;
+      if (voiceToggle.checked) speak(response.replace(/<[^>]*>/g, ""));
+      input.value = "";
+    }
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'hi-IN';
+      const voices = speechSynthesis.getVoices();
+      const selectedVoice = voices.find(v =>
+        v.lang === 'hi-IN' &&
+        v.name.toLowerCase().includes(selectedVoiceType)
+      );
+      if (selectedVoice) msg.voice = selectedVoice;
+      msg.rate = 0.95;
+      speechSynthesis.speak(msg);
+    }
+
+    function setVoice(type) {
+      selectedVoiceType = type;
+    }
+
+    function startListening() {
+      const status = document.getElementById('listeningStatus');
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'hi-IN';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      status.style.display = 'block';
+
+      recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript;
+        document.getElementById('userInput').value = speechResult;
+        sendMessage();
+        status.style.display = 'none';
+      };
+
+      recognition.onerror = function() {
+        status.style.display = 'none';
+        alert("Mic error");
+      };
+
+      recognition.onend = () => status.style.display = 'none';
+
+      recognition.start();
+    }
+
+    function toggleTheme() {
+      const container = document.getElementById('container');
+      isDarkMode = !isDarkMode;
+      container.classList.toggle('light-mode', !isDarkMode);
+    }
+
+    function tellStory() {
+      const story = stories[Math.floor(Math.random() * stories.length)];
+      document.getElementById('chat').innerHTML += `<p class="bot">📖 ${story}</p>`;
+      speak(story);
+    }
+
+    function react(response, emoji) {
+      alert(`You reacted ${emoji} to:\n"${response}"`);
+    }
+
+    function saveChatAsPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const chatText = document.getElementById('chat').innerText;
+      doc.text(chatText, 10, 10);
+      doc.save('chat.pdf');
+    }
+
+    function addCustomQA() {
+      const q = prompt("अपना सवाल लिखिए:");
+      const a = prompt("इसका जवाब क्या होना चाहिए?");
+      if (q && a) {
+        customQA[q.toLowerCase()] = a;
+        localStorage.setItem('customQA', JSON.stringify(customQA));
+        alert("Custom Q&A जोड़ा गया ✅");
+      }
+    }
+
+    function openFeedbackForm() {
+      const feedback = prompt("कृपया अपना सुझाव या फीडबैक दें:");
+      if (feedback) {
+        const time = new Date().toLocaleString();
+        localStorage.setItem("feedback_" + time, feedback);
+        alert("धन्यवाद! आपका फीडबैक सेव किया गया है ✅");
+      }
+    }
+
+    document.getElementById('micButton').addEventListener('click', startListening);
+    window.speechSynthesis.onvoiceschanged = () => {};
+  </script>
+</body>
+</html>
