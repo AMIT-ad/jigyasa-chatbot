@@ -151,6 +151,8 @@
       <button onclick="toggleTheme()">🌗 Theme</button>
       <button onclick="saveChatAsPDF()">🧾 Save PDF</button>
       <button onclick="tellStory()">📚 Random Story</button>
+      <button onclick="addCustomQA()">➕ Add Q&A</button>
+      <button onclick="openFeedbackForm()">📝 Feedback</button>
     </div>
 
     <div id="listeningStatus">🎤 Listening...</div>
@@ -171,20 +173,32 @@
   <script>
     const qa = {
       "hello": "hello! hello sir।",
-      "how are you": "my name is jigyasa!",
-      "your name": "मेरा नाम जिज्ञासा है।",
+      "how are you": "i am fine sir!",
+      "whats your name": "my name is jigyasa।",
       "bye": "by sir।",
       "how made you": "mujhe create karne wale ka naam amitdhakad hai",
       "thank you jigyas": "jigyasa khush hui!",
       "open google": "आप इस लिंक से Google खोल सकते हैं: https://www.google.com",
-      "what is ai": "AI का मतलब है कृत्रिम बुद्धिमत्ता।"
+      "url": "deepseek,grok,google,ngrok,ziphisher,chatgpt,ip lookup,ipaddress.my,mobile number infomation",
+      "deepseek": "https://chat.deepseek.com/",
+      "grok": "https://grok.com/chat/ba7cb22b-5050-4ece-89a8-4526f7fc0060",
+      "chatgpt": "https://chatgpt.com/?model=auto",
+      "what is ai": "ai ka matalab hai Artificial intelligence",
     };
 
+    let customQA = JSON.parse(localStorage.getItem('customQA')) || {};
+
     const stories = [
-      "एक समय की बात है, एक राजा था जो न्यायप्रिय था...",
-      "एक नन्ही चिड़िया रोज अपने बच्चों के लिए खाना लाती थी...",
-      "एक जंगल में सभी जानवर मिलकर त्योहार मनाते थे..."
+      "ek samay kee baat hai, ek raaja tha jo nyaayapriy tha...",
+      "ek nanhee chidiya roj apane bachchon ke lie khaana laatee thee...",
+      "ek jangal mein sabhee jaanavar milakar tyohaar manaate the..."
     ];
+
+    const moodGIFs = {
+      happy: "https://media.giphy.com/media/yoJC2A59OCZHs1LXvW/giphy.gif",
+      sad: "https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif",
+      angry: "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif"
+    };
 
     let selectedVoiceType = 'female';
     let isDarkMode = true;
@@ -210,12 +224,23 @@
         }
       }
 
+      for (let q in customQA) {
+        if (userText.toLowerCase().includes(q)) {
+          response = customQA[q];
+          break;
+        }
+      }
+
       if (personality === 'friendly') response = `😊 ज़रूर! ${response}`;
       if (personality === 'teacher') response = `📚 ध्यान से सुनिए... ${response}`;
 
       if (mood === 'happy') response = `😄 ${response}`;
       else if (mood === 'sad') response = `😔 ${response}`;
       else if (mood === 'angry') response = `😠 ${response}`;
+
+      if (mood && moodGIFs[mood]) {
+        response += `<br><img src="${moodGIFs[mood]}" width="120" style="margin-top:8px;border-radius:10px;">`;
+      }
 
       const id = Date.now();
       chat.innerHTML += `<p class="bot" id="bot-${id}">🤖 Jigyasa: ${response}</p>
@@ -225,7 +250,7 @@
                           <button onclick="react('${response}','❤️')">❤️</button>
                          </div>`;
       chat.scrollTop = chat.scrollHeight;
-      if (voiceToggle.checked) speak(response);
+      if (voiceToggle.checked) speak(response.replace(/<[^>]*>/g, ""));
       input.value = "";
     }
 
@@ -294,6 +319,25 @@
       const chatText = document.getElementById('chat').innerText;
       doc.text(chatText, 10, 10);
       doc.save('chat.pdf');
+    }
+
+    function addCustomQA() {
+      const q = prompt("अपना सवाल लिखिए:");
+      const a = prompt("इसका जवाब क्या होना चाहिए?");
+      if (q && a) {
+        customQA[q.toLowerCase()] = a;
+        localStorage.setItem('customQA', JSON.stringify(customQA));
+        alert("Custom Q&A जोड़ा गया ✅");
+      }
+    }
+
+    function openFeedbackForm() {
+      const feedback = prompt("कृपया अपना सुझाव या फीडबैक दें:");
+      if (feedback) {
+        const time = new Date().toLocaleString();
+        localStorage.setItem("feedback_" + time, feedback);
+        alert("धन्यवाद! आपका फीडबैक सेव किया गया है ✅");
+      }
     }
 
     document.getElementById('micButton').addEventListener('click', startListening);
