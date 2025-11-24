@@ -1,1164 +1,766 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <title>Jigyasa - Advanced AI Chatbot</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tejas AI Assistant</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            min-height: 100vh;
-            transition: all 0.3s ease;
-        }
+    :root {
+      --primary: #2563eb;
+      --secondary: #059669;
+      --accent: #d97706;
+      --dark: #0f172a;
+      --light: #f8fafc;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    body {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      min-height: 90vh;
+    }
 
-        .avatar-container {
-            position: relative;
-            display: inline-block;
-        }
+    /* Header Styles */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 20px;
+      text-align: center;
+      color: white;
+      position: relative;
+    }
 
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 5px solid #4CAF50;
-            animation: float 3s ease-in-out infinite;
-        }
+    .avatar-container {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 15px;
+      border-radius: 50%;
+      border: 4px solid white;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .status-indicator {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 20px;
-            height: 20px;
-            background: #4CAF50;
-            border-radius: 50%;
-            border: 3px solid white;
-            animation: pulse 2s infinite;
-        }
+    .avatar {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+    }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
+    .header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+    .header p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-        }
+    /* Main Content */
+    .main-content {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 0;
+      height: 600px;
+    }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            min-width: 200px;
-        }
+    /* Sidebar */
+    .sidebar {
+      background: var(--light);
+      padding: 25px;
+      border-right: 1px solid #e2e8f0;
+      overflow-y: auto;
+    }
 
-        select, button, input[type="range"] {
-            padding: 12px 15px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .control-group {
+      margin-bottom: 25px;
+    }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
+    .control-group h3 {
+      color: var(--text-dark);
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .main-content {
-            display: flex;
-            gap: 20px;
-            flex: 1;
-        }
+    .control-group h3 i {
+      color: var(--primary);
+    }
 
-        .sidebar {
-            width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      padding: 12px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
 
-        .user-profile {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
 
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
 
-        .quick-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
 
-        .quick-action-btn {
-            padding: 12px;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
 
-        .quick-action-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: translateX(5px);
-        }
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
 
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
 
-        .chat-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+    .voice-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
 
-        .chat-box {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            max-height: 500px;
-            background: #f8f9fa;
-        }
+    .voice-btn {
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
 
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            animation: messageAppear 0.3s ease;
-        }
+    .voice-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
 
-        @keyframes messageAppear {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    select, .action-btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-        .user-message {
-            justify-content: flex-end;
-        }
+    .action-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+    }
 
-        .bot-message {
-            justify-content: flex-start;
-        }
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
+    /* Chat Area */
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
 
-        .user-msg-avatar {
-            background: #667eea;
-        }
+    .chat-box {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+      background: #f8fafc;
+    }
 
-        .bot-msg-avatar {
-            background: #4CAF50;
-        }
+    .message {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: fadeInUp 0.3s ease;
+    }
 
-        .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-        }
+    .user-message {
+      justify-content: flex-end;
+    }
 
-        .user-message .message-content {
-            background: #667eea;
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
+    .bot-message {
+      justify-content: flex-start;
+    }
 
-        .bot-message .message-content {
-            background: white;
-            color: #333;
-            border: 1px solid #e9ecef;
-            border-bottom-left-radius: 5px;
-        }
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      flex-shrink: 0;
+    }
 
-        .message-time {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
+    .user-avatar {
+      background: var(--primary);
+    }
 
-        .typing-indicator {
-            display: none;
-            padding: 10px 16px;
-            background: white;
-            border-radius: 18px;
-            border: 1px solid #e9ecef;
-            margin-bottom: 15px;
-        }
+    .bot-avatar {
+      background: var(--secondary);
+    }
 
-        .typing-dots {
-            display: flex;
-            gap: 3px;
-        }
+    .message-content {
+      max-width: 70%;
+      padding: 15px 20px;
+      border-radius: 18px;
+      line-height: 1.5;
+    }
 
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
+    .user-message .message-content {
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      color: white;
+      border-bottom-right-radius: 5px;
+    }
 
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    .bot-message .message-content {
+      background: white;
+      color: var(--text-dark);
+      border: 1px solid #e2e8f0;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
 
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
+    .reactions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
 
-        .input-container {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+    .reaction-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
 
-        .message-input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
+    .reaction-btn:hover {
+      transform: scale(1.2);
+    }
 
-        .message-input:focus {
-            border-color: #667eea;
-        }
+    /* Input Area */
+    .input-area {
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
 
-        .send-btn, .mic-btn {
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
 
-        .send-btn:hover, .mic-btn:hover {
-            transform: scale(1.1);
-        }
+    #userInput {
+      width: 100%;
+      padding: 16px 50px 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 25px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
 
-        .mic-btn.listening {
-            background: #ff4757;
-            animation: pulse 1s infinite;
-        }
+    #userInput:focus {
+      border-color: var(--primary);
+    }
 
-        .quick-replies {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
+    .input-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      cursor: pointer;
+    }
 
-        .quick-reply {
-            padding: 8px 16px;
-            background: #f1f3f4;
-            border: none;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
 
-        .quick-reply:hover {
-            background: #667eea;
-            color: white;
-        }
+    .icon-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
 
-        .games-container {
-            display: none;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
+    .icon-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
-        .game-option {
-            padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: var(--dark);
+      color: white;
+    }
 
-        .game-option:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
 
-        .dark-mode {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: #ecf0f1;
-        }
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        .dark-mode .header,
-        .dark-mode .controls,
-        .dark-mode .sidebar,
-        .dark-mode .chat-container {
-            background: rgba(44, 62, 80, 0.95);
-            color: #ecf0f1;
-        }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
 
-        .dark-mode .message-input {
-            background: #34495e;
-            border-color: #4a6572;
-            color: #ecf0f1;
-        }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
 
-        .dark-mode .bot-message .message-content {
-            background: #34495e;
-            color: #ecf0f1;
-            border-color: #4a6572;
-        }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .message-content {
+        max-width: 85%;
+      }
+    }
 
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background: #4CAF50;
-            color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-            }
-            .controls {
-                flex-direction: column;
-            }
-        }
-    </style>
+    #listeningStatus {
+      text-align: center;
+      color: #d97706;
+      margin: 10px 0;
+      display: none;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container" id="container">
-        <div class="header">
-            <div class="avatar-container">
-                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Jigyasa Avatar" class="avatar">
-                <div class="status-indicator"></div>
-            </div>
-            <h1>Jigyasa - AI Assistant</h1>
-            <p>Your intelligent Hindi-speaking companion</p>
-        </div>
-
-        <div class="controls">
-            <div class="control-group">
-                <label>Voice Settings</label>
-                <select id="voiceType">
-                    <option value="female">👩 Female Voice</option>
-                    <option value="male">👨 Male Voice</option>
-                </select>
-                <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1">
-                <span>Speed: <span id="speedValue">1.0</span></span>
-            </div>
-
-            <div class="control-group">
-                <label>Personality</label>
-                <select id="personality">
-                    <option value="friendly">😊 Friendly</option>
-                    <option value="professional">💼 Professional</option>
-                    <option value="funny">😄 Funny</option>
-                    <option value="teacher">👩‍🏫 Teacher</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label>Theme</label>
-                <button onclick="toggleTheme()">🌙 Dark Mode</button>
-                <button onclick="changeBackground()">🎨 Change Background</button>
-            </div>
-
-            <div class="control-group">
-                <label>Tools</label>
-                <button onclick="showGames()">🎮 Games</button>
-                <button onclick="showCalculator()">🧮 Calculator</button>
-                <button onclick="showConverter()">📐 Converter</button>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="sidebar">
-                <div class="user-profile">
-                    <div class="user-avatar">👤</div>
-                    <h3 id="userName">Guest User</h3>
-                    <p>Chat Level: <span id="userLevel">Beginner</span></p>
-                </div>
-
-                <div class="quick-actions">
-                    <button class="quick-action-btn" onclick="quickAction('weather')">🌤️ Weather Info</button>
-                    <button class="quick-action-btn" onclick="quickAction('joke')">😄 Tell me a Joke</button>
-                    <button class="quick-action-btn" onclick="quickAction('fact')">📚 Interesting Fact</button>
-                    <button class="quick-action-btn" onclick="quickAction('quote')">💫 Daily Quote</button>
-                    <button class="quick-action-btn" onclick="quickAction('news')">📰 Today's News</button>
-                    <button class="quick-action-btn" onclick="quickAction('story')">📖 Short Story</button>
-                    <button class="quick-action-btn" onclick="quickAction('calculator')">🧮 Open Calculator</button>
-                    <button class="quick-action-btn" onclick="quickAction('converter')">📐 Unit Converter</button>
-                </div>
-
-                <div class="user-stats">
-                    <h4>Today's Activity</h4>
-                    <p>Messages: <span id="messageCount">0</span></p>
-                    <p>Session Time: <span id="sessionTime">00:00</span></p>
-                </div>
-            </div>
-
-            <div class="chat-container">
-                <div class="chat-header">
-                    <h2>💬 Chat with Jigyasa</h2>
-                    <p>Ask me anything in Hindi or English!</p>
-                </div>
-
-                <div class="chat-box" id="chatBox">
-                    <div class="message bot-message">
-                        <div class="message-avatar bot-msg-avatar">J</div>
-                        <div class="message-content">
-                            नमस्ते! मैं Jigyasa हूँ, आपकी AI सहायक। मैं हिंदी और अंग्रेजी दोनों में बात कर सकती हूँ। आप मुझसे कुछ भी पूछ सकते हैं!
-                            <div class="message-time" id="currentTime"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="typing-dots">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
-
-                <div class="input-container">
-                    <input type="text" class="message-input" id="messageInput" 
-                           placeholder="Type your message here..." 
-                           onkeypress="handleKeyPress(event)">
-                    <button class="mic-btn" id="micButton" onclick="toggleListening()">🎤</button>
-                    <button class="send-btn" onclick="sendMessage()">➤</button>
-                </div>
-
-                <div class="quick-replies" id="quickReplies">
-                    <button class="quick-reply" onclick="quickReply('hello')">नमस्ते</button>
-                    <button class="quick-reply" onclick="quickReply('how_are_you')">कैसे हो?</button>
-                    <button class="quick-reply" onclick="quickReply('time')">समय बताओ</button>
-                    <button class="quick-reply" onclick="quickReply('joke')">जोक सुनाओ</button>
-                    <button class="quick-reply" onclick="quickReply('weather')">मौसम कैसा है?</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="games-container" id="gamesContainer">
-            <h3>🎮 Mini Games</h3>
-            <div class="game-option" onclick="startGame('quiz')">🧠 सामान्य ज्ञान क्विज</div>
-            <div class="game-option" onclick="startGame('riddle')">🤔 पहेलियाँ</div>
-            <div class="game-option" onclick="startGame('math')">➗ गणित के सवाल</div>
-            <div class="game-option" onclick="startGame('word')">🔤 शब्द खेल</div>
-        </div>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="avatar-container">
+        <i class="fas fa-robot avatar" style="font-size: 3rem; color: #2563eb;"></i>
+      </div>
+      <h1>Tejas AI</h1>
+      <p>आपका व्यक्तिगत AI सहायक</p>
     </div>
 
-    <div class="notification" id="notification"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="control-group">
+          <h3><i class="fas fa-robot"></i> व्यक्तित्व</h3>
+          <select id="personality">
+            <option value="normal">सामान्य</option>
+            <option value="friendly">मित्रवत</option>
+            <option value="teacher">शिक्षक</option>
+          </select>
+          
+          <select id="mood">
+            <option value="">मूड चुनें</option>
+            <option value="happy">😊 खुश</option>
+            <option value="sad">😔 उदास</option>
+            <option value="angry">😠 गुस्सा</option>
+          </select>
+        </div>
 
-    <script>
-        // Advanced configuration
-        const CONFIG = {
-            ai: {
-                enabled: true,
-                contextMemory: 10,
-                learningRate: 0.1
-            },
-            voice: {
-                enabled: true,
-                defaultSpeed: 1,
-                languages: ['hi-IN', 'en-US']
-            },
-            storage: {
-                enabled: true,
-                encryption: true,
-                backupInterval: 300000
-            }
-        };
+        <div class="control-group">
+          <h3><i class="fas fa-volume-up"></i> आवाज सेटिंग</h3>
+          <div class="toggle-switch">
+            <span>आवाज प्रतिक्रिया</span>
+            <label class="switch">
+              <input type="checkbox" id="voiceToggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="voice-buttons">
+            <div class="voice-btn active" id="maleVoiceBtn">
+              <i class="fas fa-male"></i><br>पुरुष
+            </div>
+            <div class="voice-btn" id="femaleVoiceBtn">
+              <i class="fas fa-female"></i><br>महिला
+            </div>
+          </div>
+        </div>
 
-        // Enhanced Q&A database
-        const KNOWLEDGE_BASE = {
-            // Hindi greetings and basic queries
-            "नमस्ते": "नमस्ते! मैं Jigyasa हूँ। आपकी क्या मदद कर सकती हूँ?",
-            "हैलो": "हैलो! कैसे हो आप?",
-            "कैसे हो": "मैं बिल्कुल ठीक हूँ, धन्यवाद! आप सुनाइए?",
-            "तुम्हारा नाम क्या है": "मेरा नाम Jigyasa है, जिसका मतलब है 'जिज्ञासा'!",
-            "धन्यवाद": "आपका स्वागत है! कोई और मदद चाहिए?",
-            
-            // English queries
-            "hello": "Hello! I'm Jigyasa, your AI assistant. How can I help you today?",
-            "how are you": "I'm doing great, thank you! How about you?",
-            "what is your name": "My name is Jigyasa, which means 'curiosity' in Hindi!",
-            "thank you": "You're welcome! Is there anything else I can help with?",
-            
-            // Weather and time
-            "मौसम": "मैं real-time मौसम नहीं बता सकती, लेकिन आप weather app check कर सकते हैं",
-            "समय": `अभी समय है: ${new Date().toLocaleTimeString('hi-IN')}`,
-            "तारीख": `आज की तारीख: ${new Date().toLocaleDateString('hi-IN')}`,
-            
-            // Jokes
-            "जोक": getRandomJoke(),
-            "चुटकुला": getRandomJoke(),
-            "हंसाओ": getRandomJoke(),
-            
-            // Facts
-            "तथ्य": getRandomFact(),
-            "रोचक तथ्य": getRandomFact(),
-            "जानकारी": getRandomFact(),
-            
-            // Stories
-            "कहानी": getRandomStory(),
-            "स्टोरी": getRandomStory(),
-            
-            // Help
-            "मदद": "मैं आपकी these चीजों में मदद कर सकती हूँ: बातचीत, जानकारी, मनोरंजन, गणना, रूपांतरण, और बहुत कुछ!",
-            "help": "I can help you with: conversation, information, entertainment, calculations, conversions, and much more!"
-        };
+        <div class="control-group">
+          <h3><i class="fas fa-magic"></i> क्विक एक्शन</h3>
+          <button class="action-btn" onclick="tellStory()">
+            <i class="fas fa-book"></i> कहानी सुनाएं
+          </button>
+          <button class="action-btn" onclick="saveChatAsPDF()">
+            <i class="fas fa-file-pdf"></i> PDF सेव करें
+          </button>
+          <button class="action-btn" onclick="addCustomQA()">
+            <i class="fas fa-plus"></i> नया Q&A जोड़ें
+          </button>
+          <button class="action-btn" onclick="openFeedbackForm()">
+            <i class="fas fa-comment"></i> फीडबैक दें
+          </button>
+          <button class="action-btn" onclick="toggleTheme()">
+            <i class="fas fa-palette"></i> थीम बदलें
+          </button>
+        </div>
+      </div>
 
-        // Advanced responses database
-        const ADVANCED_RESPONSES = {
-            jokes: [
-                "एक आदमी डॉक्टर के पास गया: 'डॉक्टर साहब, मुझे भूलने की बीमारी है।' डॉक्टर बोले: 'कब से?' आदमी बोला: 'कब से क्या?'",
-                "टीचर: 'बच्चों, 2×2 कितना होता है?' स्टूडेंट: 'मैडम, 4!' टीचर: 'बहुत अच्छा!' स्टूडेंट: 'लेकिन मैडम, मुझे यह बताइए कि क्यों होता है?'",
-                "पति ने पत्नी से पूछा: 'तुम्हारी उम्र क्या है?' पत्नी बोली: 'मेरी उम्र रहस्य है!' पति: 'तो फिर तुम बहुत पुराना रहस्य हो!'"
-            ],
-            facts: [
-                "दुनिया का सबसे बड़ा महासागर प्रशांत महासागर है, जो पृथ्वी की सतह के एक तिहाई से अधिक को कवर करता है।",
-                "मानव मस्तिष्क एक दिन में लगभग 70,000 विचार उत्पन्न करता है।",
-                "शहद एकमात्र ऐसा खाद्य पदार्थ है जो कभी खराब नहीं होता - archaeologists ने 3000 साल पुराना शहद खाया जो अभी भी अच्छा था!"
-            ],
-            stories: [
-                "एक समय की बात है, एक छोटा सा गाँव था जहाँ सभी लोग मिलजुल कर रहते थे। एक दिन गाँव में एक जादूगर आया...",
-                "पहाड़ों की गोद में बसा एक छोटा सा कस्बा था। वहाँ एक लड़का रहता था जिसकी सबसे बड़ी इच्छा थी पढ़-लिख कर डॉक्टर बनने की...",
-                "जंगल के राजा शेर का जन्मदिन था। सभी जानवर उन्हें बधाई देने आए। खरगोश ने एक विशेष उपहार लाने का सोचा..."
-            ],
-            quotes: [
-                "जीवन में सफलता के लिए इच्छाशक्ति, विश्वास और कड़ी मेहनत की आवश्यकता होती है।",
-                "समय सबसे बड़ा शिक्षक है, लेकिन दुर्भाग्य से यह सभी छात्रों को मार देता है।",
-                "सपने वो नहीं जो आप नींद में देखें, सपने वो हैं जो आपको नींद ही न आने दें।"
-            ]
-        };
+      <!-- Chat Area -->
+      <div class="chat-area">
+        <div id="listeningStatus">🎤 सुन रहा हूं...</div>
+        <div class="chat-box" id="chat">
+          <!-- Messages will appear here -->
+          <div class="message bot-message">
+            <div class="message-avatar bot-avatar">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+              नमस्ते! मैं Tejas AI हूं। आपकी किस प्रकार सहायता कर सकता हूं?
+            </div>
+          </div>
+        </div>
 
-        // Game database
-        const GAMES = {
-            quiz: [
-                {
-                    question: "भारत की राजधानी क्या है?",
-                    options: ["मुंबई", "दिल्ली", "कोलकाता", "चेन्नई"],
-                    answer: 1
-                },
-                {
-                    question: "सूर्य से पृथ्वी की दूरी कितनी है?",
-                    options: ["100 million km", "150 million km", "200 million km", "250 million km"],
-                    answer: 1
-                },
-                {
-                    question: "गंगा नदी कहाँ से निकलती है?",
-                    options: ["हिमालय", "गंगोत्री", "यमुनोत्री", "केदारनाथ"],
-                    answer: 1
-                }
-            ],
-            riddles: [
-                {
-                    riddle: "ऐसी कौन सी चीज है जो गर्मियों में गर्म और सर्दियों में ठंडी रहती है?",
-                    answer: "तवा"
-                },
-                {
-                    riddle: "पानी में रहकर भी प्यास क्यों नहीं बुझती?",
-                    answer: "मछली"
-                },
-                {
-                    riddle: "ऐसा कौन सा फल है जिसमें दो नाम होते हैं?",
-                    answer: "अनार"
-                }
-            ]
-        };
+        <!-- Input Area -->
+        <div class="input-area">
+          <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="अपना संदेश यहाँ टाइप करें..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <div class="input-icon" onclick="startListening()">
+              <i class="fas fa-microphone"></i>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="icon-btn" onclick="sendMessage()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        // Global variables
-        let chatHistory = [];
-        let userProfile = {
-            name: "Guest",
-            level: "Beginner",
-            messagesSent: 0,
-            sessionStart: new Date(),
-            preferences: {
-                language: "hi",
-                voiceEnabled: true,
-                theme: "light"
-            }
-        };
-        let isListening = false;
-        let recognition;
-        let sessionTimer;
+    <!-- Footer -->
+    <div class="footer">
+      <b>For More GPTs Visit: <a href="https://sites.google.com/view/custom-gpt-store/home" target="_blank">GPT Store</a></b>
+    </div>
+  </div>
 
-        // Initialize the chatbot
-        function init() {
-            loadUserData();
-            updateTime();
-            startSessionTimer();
-            setupVoiceRecognition();
-            showNotification("Jigyasa started successfully! 🚀");
-            
-            // Update time every second
-            setInterval(updateTime, 1000);
+  <script>
+    const qa = {
+      "hello": "नमस्ते! आपका दिन शुभ हो!",
+      "how are you": "मैं बिल्कुल ठीक हूं, धन्यवाद! आप कैसे हैं?",
+      "whats your name": "मेरा नाम तेजस है - मैं आपका AI सहायक हूं",
+      "bye": "अलविदा! आपसे बात करके अच्छा लगा",
+      "how made you": "मुझे बनाने वाले का नाम अमित धाकड़ है",
+      "thank you tejas": "तेजस खुश हुआ! आपका धन्यवाद",
+      "open google": "आप इस लिंक से Google खोल सकते हैं: https://www.google.com",
+      "url": "deepseek,grok,google,ngrok,ziphisher,chatgpt,ip lookup,ipaddress.my,mobile number infomation",
+      "deepseek": "https://chat.deepseek.com/",
+      "grok": "https://grok.com/",
+      "chatgpt": "https://chatgpt.com/",
+      "what is ai": "AI का मतलब है Artificial Intelligence - कृत्रिम बुद्धिमत्ता",
+    };
+
+    let customQA = JSON.parse(localStorage.getItem('customQA')) || {};
+    const stories = [
+      "एक समय की बात है, एक राजा था जो न्यायप्रिय था और अपनी प्रजा का बहुत ध्यान रखता था।",
+      "एक नन्ही चिड़िया रोज अपने बच्चों के लिए खाना लाती थी और उन्हें प्यार से पालती थी।",
+      "एक जंगल में सभी जानवर मिलकर त्योहार मनाते थे और खुशी से रहते थे।"
+    ];
+
+    const moodGIFs = {
+      happy: "https://media.giphy.com/media/yoJC2A59OCZHs1LXvW/giphy.gif",
+      sad: "https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif",
+      angry: "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif"
+    };
+
+    let selectedVoiceType = 'male';
+    let isDarkMode = false;
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const chat = document.getElementById('chat');
+      const voiceToggle = document.getElementById('voiceToggle');
+      const mood = document.getElementById('mood').value;
+      const personality = document.getElementById('personality').value;
+      const userText = input.value.trim();
+      
+      if (!userText) return;
+
+      // Add user message
+      const userMessage = document.createElement('div');
+      userMessage.className = 'message user-message';
+      userMessage.innerHTML = `
+        <div class="message-content">${userText}</div>
+        <div class="message-avatar user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+      `;
+      chat.appendChild(userMessage);
+
+      // Generate bot response
+      let response = "माफ कीजिए, मैं समझ नहीं पाया। क्या आप दोबारा कह सकते हैं?";
+      
+      for (let q in qa) {
+        if (userText.toLowerCase().includes(q)) {
+          response = qa[q];
+          break;
         }
-
-        // Load user data from localStorage
-        function loadUserData() {
-            const savedData = localStorage.getItem('jigyasa_user');
-            if (savedData) {
-                userProfile = {...userProfile, ...JSON.parse(savedData)};
-                document.getElementById('userName').textContent = userProfile.name;
-                document.getElementById('userLevel').textContent = userProfile.level;
-                document.getElementById('messageCount').textContent = userProfile.messagesSent;
-            }
+      }
+      
+      for (let q in customQA) {
+        if (userText.toLowerCase().includes(q)) {
+          response = customQA[q];
+          break;
         }
+      }
 
-        // Save user data to localStorage
-        function saveUserData() {
-            localStorage.setItem('jigyasa_user', JSON.stringify(userProfile));
+      // Apply personality
+      if (personality === 'friendly') response = `😊 ज़रूर! ${response}`;
+      if (personality === 'teacher') response = `📚 ध्यान से सुनिए... ${response}`;
+
+      // Apply mood
+      if (mood === 'happy') response = `😄 ${response}`;
+      else if (mood === 'sad') response = `😔 ${response}`;
+      else if (mood === 'angry') response = `😠 ${response}`;
+
+      // Add GIF if mood is selected
+      if (mood && moodGIFs[mood]) {
+        response += `<br><img src="${moodGIFs[mood]}" width="120" style="margin-top:8px;border-radius:10px;">`;
+      }
+
+      // Add bot message
+      setTimeout(() => {
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot-message';
+        botMessage.innerHTML = `
+          <div class="message-avatar bot-avatar">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="message-content">
+            ${response}
+            <div class="reactions">
+              <button class="reaction-btn" onclick="react('${response.replace(/'/g, "\\'")}','👍')">👍</button>
+              <button class="reaction-btn" onclick="react('${response.replace(/'/g, "\\'")}','👎')">👎</button>
+              <button class="reaction-btn" onclick="react('${response.replace(/'/g, "\\'")}','❤️')">❤️</button>
+            </div>
+          </div>
+        `;
+        chat.appendChild(botMessage);
+        chat.scrollTop = chat.scrollHeight;
+
+        // Speak if voice is enabled
+        if (voiceToggle.checked) {
+          speak(response.replace(/<[^>]*>/g, ""));
         }
+      }, 1000);
 
-        // Update current time display
-        function updateTime() {
-            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('hi-IN');
-        }
+      input.value = "";
+    }
 
-        // Start session timer
-        function startSessionTimer() {
-            let seconds = 0;
-            sessionTimer = setInterval(() => {
-                seconds++;
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                document.getElementById('sessionTime').textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'hi-IN';
+      const voices = speechSynthesis.getVoices();
+      const selectedVoice = voices.find(v =>
+        v.lang === 'hi-IN' &&
+        v.name.toLowerCase().includes(selectedVoiceType)
+      );
+      if (selectedVoice) msg.voice = selectedVoice;
+      msg.rate = 0.95;
+      speechSynthesis.speak(msg);
+    }
 
-        // Setup voice recognition
-        function setupVoiceRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'hi-IN';
+    function setVoice(type) {
+      selectedVoiceType = type;
+      document.querySelectorAll('.voice-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
 
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('messageInput').value = transcript;
-                    sendMessage();
-                };
+    function startListening() {
+      const status = document.getElementById('listeningStatus');
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'hi-IN';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      status.style.display = 'block';
+      
+      recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript;
+        document.getElementById('userInput').value = speechResult;
+        status.style.display = 'none';
+      };
+      
+      recognition.onerror = function() {
+        status.style.display = 'none';
+        alert("माइक त्रुटि, कृपया पुनः प्रयास करें");
+      };
+      
+      recognition.onend = () => status.style.display = 'none';
+      recognition.start();
+    }
 
-                recognition.onerror = function(event) {
-                    console.error('Speech recognition error', event.error);
-                    showNotification("Voice recognition error. Please try again.");
-                };
+    function toggleTheme() {
+      document.body.style.background = isDarkMode 
+        ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
+        : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+      isDarkMode = !isDarkMode;
+    }
 
-                recognition.onend = function() {
-                    isListening = false;
-                    document.getElementById('micButton').classList.remove('listening');
-                };
-            } else {
-                document.getElementById('micButton').style.display = 'none';
-                showNotification("Voice recognition not supported in your browser");
-            }
-        }
+    function tellStory() {
+      const story = stories[Math.floor(Math.random() * stories.length)];
+      const chat = document.getElementById('chat');
+      const botMessage = document.createElement('div');
+      botMessage.className = 'message bot-message';
+      botMessage.innerHTML = `
+        <div class="message-avatar bot-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="message-content">
+          📖 ${story}
+        </div>
+      `;
+      chat.appendChild(botMessage);
+      chat.scrollTop = chat.scrollHeight;
+      speak(story);
+    }
 
-        // Toggle voice listening
-        function toggleListening() {
-            if (!recognition) return;
+    function react(response, emoji) {
+      alert(`आपने प्रतिक्रिया दी ${emoji}:\n"${response}"`);
+    }
 
-            if (!isListening) {
-                recognition.start();
-                isListening = true;
-                document.getElementById('micButton').classList.add('listening');
-                showNotification("Listening... Speak now");
-            } else {
-                recognition.stop();
-                isListening = false;
-                document.getElementById('micButton').classList.remove('listening');
-            }
-        }
+    function saveChatAsPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const chatText = document.getElementById('chat').innerText;
+      doc.text(chatText, 10, 10);
+      doc.save('tejas_chat.pdf');
+    }
 
-        // Handle Enter key press
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
+    function addCustomQA() {
+      const q = prompt("अपना सवाल लिखिए:");
+      const a = prompt("इसका जवाब क्या होना चाहिए?");
+      if (q && a) {
+        customQA[q.toLowerCase()] = a;
+        localStorage.setItem('customQA', JSON.stringify(customQA));
+        alert("Custom Q&A जोड़ा गया ✅");
+      }
+    }
 
-        // Main message sending function
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
+    function openFeedbackForm() {
+      const feedback = prompt("कृपया अपना सुझाव या फीडबैक दें:");
+      if (feedback) {
+        const time = new Date().toLocaleString();
+        localStorage.setItem("feedback_" + time, feedback);
+        alert("धन्यवाद! आपका फीडबैक सेव किया गया है ✅");
+      }
+    }
 
-            // Add user message to chat
-            addMessageToChat(message, 'user');
-            input.value = '';
+    // Initialize voice buttons and set male as default
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('maleVoiceBtn').classList.add('active');
+      document.getElementById('maleVoiceBtn').addEventListener('click', function() { setVoice('male'); });
+      document.getElementById('femaleVoiceBtn').addEventListener('click', function() { setVoice('female'); });
+    });
 
-            // Update user stats
-            userProfile.messagesSent++;
-            document.getElementById('messageCount').textContent = userProfile.messagesSent;
-            saveUserData();
-
-            // Show typing indicator
-            showTypingIndicator();
-
-            // Generate and show bot response
-            setTimeout(() => {
-                hideTypingIndicator();
-                const response = generateResponse(message);
-                addMessageToChat(response, 'bot');
-                speakResponse(response);
-            }, 1000 + Math.random() * 1000);
-        }
-
-        // Add message to chat box
-        function addMessageToChat(message, sender) {
-            const chatBox = document.getElementById('chatBox');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = `message-avatar ${sender}-msg-avatar`;
-            avatar.textContent = sender === 'user' ? 'U' : 'J';
-            
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            content.innerHTML = message;
-            
-            const time = document.createElement('div');
-            time.className = 'message-time';
-            time.textContent = new Date().toLocaleTimeString('hi-IN', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            content.appendChild(time);
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(content);
-            chatBox.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
-            // Add to history
-            chatHistory.push({ sender, message, time: new Date() });
-            if (chatHistory.length > CONFIG.ai.contextMemory) {
-                chatHistory.shift();
-            }
-        }
-
-        // Generate intelligent response
-        function generateResponse(userMessage) {
-            const lowerMessage = userMessage.toLowerCase();
-            
-            // Check for exact matches first
-            for (const [key, response] of Object.entries(KNOWLEDGE_BASE)) {
-                if (lowerMessage.includes(key.toLowerCase())) {
-                    return typeof response === 'function' ? response() : response;
-                }
-            }
-            
-            // Check for partial matches with synonyms
-            const response = findBestMatch(lowerMessage);
-            if (response) return response;
-            
-            // Context-aware responses
-            const contextResponse = getContextAwareResponse(lowerMessage);
-            if (contextResponse) return contextResponse;
-            
-            // Default creative response
-            return getCreativeResponse();
-        }
-
-        // Find best match using advanced matching
-        function findBestMatch(message) {
-            const synonyms = {
-                'name': ['नाम', 'name', 'whats your name', 'tumhara naam'],
-                'how': ['कैसे', 'how', 'kaise', 'kese'],
-                'weather': ['मौसम', 'weather', 'mosam', 'temperature'],
-                'time': ['समय', 'time', 'samay', 'kitna bajaa']
-            };
-            
-            for (const [category, words] of Object.entries(synonyms)) {
-                if (words.some(word => message.includes(word))) {
-                    switch(category) {
-                        case 'name':
-                            return "मेरा नाम Jigyasa है! मैं एक AI सहायक हूँ।";
-                        case 'how':
-                            return "मैं बहुत अच्छी हूँ, धन्यवाद! आप कैसे हैं?";
-                        case 'weather':
-                            return "मैं real-time मौसम नहीं बता सकती, लेकिन आप weather app check कर सकते हैं";
-                        case 'time':
-                            return `अभी समय है: ${new Date().toLocaleTimeString('hi-IN')}`;
-                    }
-                }
-            }
-            
-            return null;
-        }
-
-        // Get context-aware response
-        function getContextAwareResponse(message) {
-            const lastMessage = chatHistory[chatHistory.length - 2];
-            
-            if (lastMessage && lastMessage.sender === 'user') {
-                if (lastMessage.message.toLowerCase().includes('name') && message.includes('what')) {
-                    return "मैं Jigyasa हूँ! क्या आप मेरा नाम भूल गए? 😊";
-                }
-                
-                if (lastMessage.message.toLowerCase().includes('how') && message.includes('fine')) {
-                    return "बहुत अच्छा! आपके दिन अच्छे गुजरें!";
-                }
-            }
-            
-            return null;
-        }
-
-        // Get creative default response
-        function getCreativeResponse() {
-            const responses = [
-                "यह एक दिलचस्प सवाल है! मैं अभी इसका जवाब नहीं जानती, लेकिन मैं सीख रही हूँ।",
-                "माफ कीजिए, मैं इस प्रश्न का उत्तर नहीं जानती। आप कुछ और पूछ सकते हैं?",
-                "वाह! यह सवाल तो मुश्किल है। मैं अभी इसके बारे में नहीं जानती, लेकिन जल्द ही सीखूंगी!",
-                "मैं अभी इस प्रश्न का उत्तर देने में सक्षम नहीं हूँ। क्या आप कुछ और पूछना चाहेंगे?"
-            ];
-            
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        // Show typing indicator
-        function showTypingIndicator() {
-            document.getElementById('typingIndicator').style.display = 'block';
-            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
-        }
-
-        // Hide typing indicator
-        function hideTypingIndicator() {
-            document.getElementById('typingIndicator').style.display = 'none';
-        }
-
-        // Speak response
-        function speakResponse(text) {
-            if (!CONFIG.voice.enabled || !userProfile.preferences.voiceEnabled) return;
-            
-            // Clean text for speech
-            const cleanText = text.replace(/[<>&]/g, '');
-            
-            const speech = new SpeechSynthesisUtterance(cleanText);
-            speech.lang = userProfile.preferences.language === 'hi' ? 'hi-IN' : 'en-US';
-            speech.rate = parseFloat(document.getElementById('voiceSpeed').value);
-            
-            const voices = speechSynthesis.getVoices();
-            const preferredVoice = voices.find(voice => 
-                voice.lang === speech.lang && 
-                voice.name.toLowerCase().includes(document.getElementById('voiceType').value)
-            );
-            
-            if (preferredVoice) {
-                speech.voice = preferredVoice;
-            }
-            
-            speechSynthesis.speak(speech);
-        }
-
-        // Quick actions
-        function quickAction(action) {
-            let response = "";
-            
-            switch(action) {
-                case 'weather':
-                    response = "मैं real-time मौसम नहीं बता सकती, लेकिन आप weather app check कर सकते हैं। आज का मौसम सामान्य रहने की संभावना है।";
-                    break;
-                case 'joke':
-                    response = getRandomJoke();
-                    break;
-                case 'fact':
-                    response = getRandomFact();
-                    break;
-                case 'quote':
-                    response = getRandomQuote();
-                    break;
-                case 'news':
-                    response = "आज की मुख्य खबरें: Technology के क्षेत्र में नए innovation, Education system में सुधार, और स्वास्थ्य सेवाओं का विस्तार।";
-                    break;
-                case 'story':
-                    response = getRandomStory();
-                    break;
-                case 'calculator':
-                    showCalculator();
-                    return;
-                case 'converter':
-                    showConverter();
-                    return;
-            }
-            
-            addMessageToChat(response, 'bot');
-            speakResponse(response);
-        }
-
-        // Quick replies
-        function quickReply(type) {
-            const messages = {
-                'hello': 'नमस्ते! कैसे हो आप?',
-                'how_are_you': 'मैं बिल्कुल ठीक हूँ! आप सुनाइए?',
-                'time': `अभी समय है: ${new Date().toLocaleTimeString('hi-IN')}`,
-                'joke': getRandomJoke(),
-                'weather': 'आज का मौसम सुहावना है! बाहर घूमने का मन कर रहा है।'
-            };
-            
-            document.getElementById('messageInput').value = messages[type];
-            sendMessage();
-        }
-
-        // Utility functions
-        function getRandomJoke() {
-            const jokes = ADVANCED_RESPONSES.jokes;
-            return jokes[Math.floor(Math.random() * jokes.length)];
-        }
-
-        function getRandomFact() {
-            const facts = ADVANCED_RESPONSES.facts;
-            return facts[Math.floor(Math.random() * facts.length)];
-        }
-
-        function getRandomStory() {
-            const stories = ADVANCED_RESPONSES.stories;
-            return stories[Math.floor(Math.random() * stories.length)];
-        }
-
-        function getRandomQuote() {
-            const quotes = ADVANCED_RESPONSES.quotes;
-            return quotes[Math.floor(Math.random() * quotes.length)];
-        }
-
-        // Theme and UI functions
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const button = event.target;
-            button.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
-            userProfile.preferences.theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-            saveUserData();
-        }
-
-        function changeBackground() {
-            const gradients = [
-                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-            ];
-            
-            const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
-            document.body.style.background = randomGradient;
-        }
-
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // Games and tools
-        function showGames() {
-            const gamesContainer = document.getElementById('gamesContainer');
-            gamesContainer.style.display = gamesContainer.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function startGame(gameType) {
-            let gameMessage = "";
-            
-            switch(gameType) {
-                case 'quiz':
-                    const quiz = GAMES.quiz[Math.floor(Math.random() * GAMES.quiz.length)];
-                    gameMessage = `🧠 क्विज: ${quiz.question}\n\nविकल्प:\n${quiz.options.map((opt, i) => `${i+1}. ${opt}`).join('\n')}`;
-                    break;
-                case 'riddle':
-                    const riddle = GAMES.riddles[Math.floor(Math.random() * GAMES.riddles.length)];
-                    gameMessage = `🤔 पहेली: ${riddle.riddle}\n\n(जवाब के लिए 'उत्तर' लिखें)`;
-                    break;
-                case 'math':
-                    const num1 = Math.floor(Math.random() * 50) + 1;
-                    const num2 = Math.floor(Math.random() * 50) + 1;
-                    const operators = ['+', '-', '*'];
-                    const operator = operators[Math.floor(Math.random() * operators.length)];
-                    gameMessage = `➗ गणित: ${num1} ${operator} ${num2} = ?`;
-                    break;
-                case 'word':
-                    const words = ['स्कूल', 'किताब', 'दोस्त', 'परिवार', 'खेल'];
-                    const randomWord = words[Math.floor(Math.random() * words.length)];
-                    gameMessage = `🔤 शब्द खेल: '${randomWord}' का पर्यायवाची शब्द बताइए`;
-                    break;
-            }
-            
-            addMessageToChat(gameMessage, 'bot');
-            showGames(); // Hide games container
-        }
-
-        function showCalculator() {
-            const expression = prompt("कैलकुलेटर:\nगणित का expression दर्ज करें (जैसे: 2+2, 10*5):");
-            if (expression) {
-                try {
-                    const result = eval(expression);
-                    addMessageToChat(`🧮 कैलकुलेशन: ${expression} = ${result}`, 'bot');
-                } catch (error) {
-                    addMessageToChat("❌ गलत expression! कृपया सही format में दर्ज करें।", 'bot');
-                }
-            }
-        }
-
-        function showConverter() {
-            const conversion = prompt("यूनिट कनवर्टर:\nकन्वर्ट करने के लिए दर्ज करें (जैसे: '10 km to m', '100 celsius to fahrenheit'):");
-            if (conversion) {
-                const response = handleUnitConversion(conversion);
-                addMessageToChat(response, 'bot');
-            }
-        }
-
-        function handleUnitConversion(input) {
-            // Simple unit conversion logic
-            const lowerInput = input.toLowerCase();
-            
-            if (lowerInput.includes('km') && lowerInput.includes('m')) {
-                const km = parseFloat(input);
-                if (!isNaN(km)) {
-                    return `📐 रूपांतरण: ${km} km = ${km * 1000} meters`;
-                }
-            }
-            
-            if (lowerInput.includes('celsius') && lowerInput.includes('fahrenheit')) {
-                const celsius = parseFloat(input);
-                if (!isNaN(celsius)) {
-                    const fahrenheit = (celsius * 9/5) + 32;
-                    return `🌡️ रूपांतरण: ${celsius}°C = ${fahrenheit.toFixed(2)}°F`;
-                }
-            }
-            
-            return "❌ रूपांतरण समझ नहीं आया। कृपया इस format में try करें: '10 km to m'";
-        }
-
-        // Voice speed control
-        document.getElementById('voiceSpeed').addEventListener('input', function() {
-            document.getElementById('speedValue').textContent = this.value;
-        });
-
-        // Personality change
-        document.getElementById('personality').addEventListener('change', function() {
-            showNotification(`Personality changed to: ${this.options[this.selectedIndex].text}`);
-        });
-
-        // Initialize when page loads
-        window.onload = init;
-    </script>
+    window.speechSynthesis.onvoiceschanged = () => {};
+  </script>
 </body>
 </html>
