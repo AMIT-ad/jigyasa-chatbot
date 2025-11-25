@@ -1,766 +1,874 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tejas AI Assistant</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tejas - Voice AI Assistant</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    :root {
-      --primary: #2563eb;
-      --secondary: #059669;
-      --accent: #d97706;
-      --dark: #0f172a;
-      --light: #f8fafc;
-      --text-dark: #1e293b;
-      --text-light: #64748b;
-    }
+        :root {
+            --primary: #2563eb;
+            --secondary: #059669;
+            --accent: #d97706;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
 
-    body {
-      font-family: 'Segoe UI', 'Arial', sans-serif;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      min-height: 100vh;
-      padding: 20px;
-      color: #333;
-    }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .app-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      min-height: 90vh;
-    }
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    /* Header Styles */
-    .header {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      padding: 20px;
-      text-align: center;
-      color: white;
-      position: relative;
-    }
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
 
-    .avatar-container {
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 15px;
-      border-radius: 50%;
-      border: 4px solid white;
-      overflow: hidden;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .avatar-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            border: 3px solid white;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .avatar {
-      width: 80%;
-      height: 80%;
-      object-fit: contain;
-    }
+        .avatar {
+            font-size: 2rem;
+            color: var(--primary);
+        }
 
-    .header h1 {
-      font-size: 2.2rem;
-      margin-bottom: 5px;
-      font-weight: 700;
-    }
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
 
-    .header p {
-      opacity: 0.9;
-      font-size: 1.1rem;
-    }
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
 
-    /* Main Content */
-    .main-content {
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 0;
-      height: 600px;
-    }
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    /* Sidebar */
-    .sidebar {
-      background: var(--light);
-      padding: 25px;
-      border-right: 1px solid #e2e8f0;
-      overflow-y: auto;
-    }
+        .dropdown-menu {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            min-width: 200px;
+        }
 
-    .control-group {
-      margin-bottom: 25px;
-    }
+        .dropdown-menu.show {
+            display: block;
+        }
 
-    .control-group h3 {
-      color: var(--text-dark);
-      margin-bottom: 15px;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        .menu-item {
+            padding: 12px 15px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
 
-    .control-group h3 i {
-      color: var(--primary);
-    }
+        .menu-item:hover {
+            background: #f1f5f9;
+        }
 
-    .toggle-switch {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      padding: 12px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-    }
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fafc;
+            max-height: 400px;
+        }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeInUp 0.3s ease;
+        }
 
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 24px;
-    }
+        .user-message {
+            justify-content: flex-end;
+        }
 
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
 
-    input:checked + .slider {
-      background-color: var(--primary);
-    }
+        .user-avatar {
+            background: var(--primary);
+        }
 
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
+        .bot-avatar {
+            background: var(--secondary);
+        }
 
-    .voice-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
 
-    .voice-btn {
-      padding: 10px;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      background: white;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
+        .user-message .message-content {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
 
-    .voice-btn.active {
-      border-color: var(--primary);
-      background: var(--primary);
-      color: white;
-    }
+        .bot-message .message-content {
+            background: white;
+            color: var(--dark);
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
 
-    select, .action-btn {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      background: white;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+        .input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-    .action-btn {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-weight: 600;
-    }
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
 
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
+        #userInput {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            outline: none;
+        }
 
-    /* Chat Area */
-    .chat-area {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
+        #userInput:focus {
+            border-color: var(--primary);
+        }
 
-    .chat-box {
-      flex: 1;
-      padding: 25px;
-      overflow-y: auto;
-      background: #f8fafc;
-    }
+        .input-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
 
-    .message {
-      margin-bottom: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      animation: fadeInUp 0.3s ease;
-    }
+        .voice-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
 
-    .user-message {
-      justify-content: flex-end;
-    }
+        .voice-btn.listening {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            animation: pulse 1.5s infinite;
+        }
 
-    .bot-message {
-      justify-content: flex-start;
-    }
+        .voice-btn:hover {
+            transform: scale(1.05);
+        }
 
-    .message-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      flex-shrink: 0;
-    }
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: var(--dark);
+            color: white;
+            font-size: 0.8rem;
+        }
 
-    .user-avatar {
-      background: var(--primary);
-    }
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
 
-    .bot-avatar {
-      background: var(--secondary);
-    }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .message-content {
-      max-width: 70%;
-      padding: 15px 20px;
-      border-radius: 18px;
-      line-height: 1.5;
-    }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
 
-    .user-message .message-content {
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
-      color: white;
-      border-bottom-right-radius: 5px;
-    }
+        #listeningStatus {
+            text-align: center;
+            color: #dc2626;
+            margin: 10px 0;
+            display: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
 
-    .bot-message .message-content {
-      background: white;
-      color: var(--text-dark);
-      border: 1px solid #e2e8f0;
-      border-bottom-left-radius: 5px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+        }
 
-    .reactions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--secondary);
+            animation: typing 1.4s infinite;
+        }
 
-    .reaction-btn {
-      background: none;
-      border: none;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-    .reaction-btn:hover {
-      transform: scale(1.2);
-    }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
 
-    /* Input Area */
-    .input-area {
-      padding: 20px;
-      background: white;
-      border-top: 1px solid #e2e8f0;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
 
-    .input-wrapper {
-      flex: 1;
-      position: relative;
-    }
+        .quick-action-btn {
+            padding: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
 
-    #userInput {
-      width: 100%;
-      padding: 16px 50px 16px 20px;
-      border: 2px solid #e2e8f0;
-      border-radius: 25px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.3s ease;
-    }
+        .quick-action-btn:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
 
-    #userInput:focus {
-      border-color: var(--primary);
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .input-icon {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-light);
-      cursor: pointer;
-    }
+        .modal.show {
+            display: flex;
+        }
 
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-    }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
 
-    .icon-btn {
-      width: 50px;
-      height: 50px;
-      border: none;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
+        .modal-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
 
-    .icon-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
 
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      background: var(--dark);
-      color: white;
-    }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
 
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .main-content {
-        grid-template-columns: 1fr;
-      }
-      
-      .sidebar {
-        display: none;
-      }
-      
-      .message-content {
-        max-width: 85%;
-      }
-    }
-
-    #listeningStatus {
-      text-align: center;
-      color: #d97706;
-      margin: 10px 0;
-      display: none;
-      font-weight: bold;
-    }
-  </style>
+        @media (max-width: 768px) {
+            .app-container {
+                min-height: 95vh;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <div class="header">
-      <div class="avatar-container">
-        <i class="fas fa-robot avatar" style="font-size: 3rem; color: #2563eb;"></i>
-      </div>
-      <h1>Tejas AI</h1>
-      <p>आपका व्यक्तिगत AI सहायक</p>
+    <div class="app-container">
+        <div class="header">
+            <button class="menu-btn" onclick="toggleMenu()">⋯</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <button class="menu-item" onclick="showStories()">
+                    <span>📖</span> Stories / कहानियां
+                </button>
+                <button class="menu-item" onclick="showJokes()">
+                    <span>😂</span> Jokes / चुटकुले
+                </button>
+                <button class="menu-item" onclick="showMotivation()">
+                    <span>💫</span> Motivation / प्रेरणा
+                </button>
+                <button class="menu-item" onclick="saveChatAsPDF()">
+                    <span>📄</span> Save PDF / PDF सेव करें
+                </button>
+                <button class="menu-item" onclick="toggleVoice()">
+                    <span>🔊</span> <span id="voiceStatus">Voice On</span>
+                </button>
+                <button class="menu-item" onclick="clearChat()">
+                    <span>🗑️</span> Clear Chat / चैट साफ करें
+                </button>
+            </div>
+            <div class="avatar-container">
+                <div class="avatar">🤖</div>
+            </div>
+            <h1>Tejas AI</h1>
+            <p>Speak • Type • Listen • बोलें • लिखें • सुनें</p>
+        </div>
+
+        <div class="chat-area">
+            <div id="listeningStatus">🎤 Listening... / सुन रहा हूं...</div>
+            <div class="chat-box" id="chat">
+                <div class="message bot-message">
+                    <div class="message-avatar bot-avatar">🤖</div>
+                    <div class="message-content">
+                        <strong>Namaste! Welcome! 🙏</strong><br><br>
+                        You can:<br>
+                        • <strong>Speak</strong> - Click mic button<br>
+                        • <strong>Type</strong> - Type in the box<br>
+                        • <strong>Listen</strong> - I'll speak responses<br><br>
+                        Use <strong>⋯ menu</strong> for stories, jokes & more!
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="userInput" placeholder="Type here or click mic to speak... / यहाँ टाइप करें या माइक पर क्लिक करके बोलें..." onkeydown="if(event.key==='Enter') sendMessage()">
+                    <button class="input-icon" onclick="sendMessage()">📤</button>
+                </div>
+                <button class="voice-btn" id="voiceButton" onclick="toggleListening()">
+                    🎤
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <b>For More GPTs Visit: <a href="https://sites.google.com/view/custom-gpt-store/home" target="_blank">GPT Store</a></b>
+        </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="control-group">
-          <h3><i class="fas fa-robot"></i> व्यक्तित्व</h3>
-          <select id="personality">
-            <option value="normal">सामान्य</option>
-            <option value="friendly">मित्रवत</option>
-            <option value="teacher">शिक्षक</option>
-          </select>
-          
-          <select id="mood">
-            <option value="">मूड चुनें</option>
-            <option value="happy">😊 खुश</option>
-            <option value="sad">😔 उदास</option>
-            <option value="angry">😠 गुस्सा</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <h3><i class="fas fa-volume-up"></i> आवाज सेटिंग</h3>
-          <div class="toggle-switch">
-            <span>आवाज प्रतिक्रिया</span>
-            <label class="switch">
-              <input type="checkbox" id="voiceToggle" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="voice-buttons">
-            <div class="voice-btn active" id="maleVoiceBtn">
-              <i class="fas fa-male"></i><br>पुरुष
+    <!-- Modals -->
+    <div class="modal" id="storiesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Stories / कहानियां</div>
+                <button class="close-btn" onclick="closeModal('storiesModal')">×</button>
             </div>
-            <div class="voice-btn" id="femaleVoiceBtn">
-              <i class="fas fa-female"></i><br>महिला
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="tellStory('hindi', 0)">बुद्धिमान किसान</button>
+                <button class="quick-action-btn" onclick="tellStory('hindi', 1)">ईमानदार लकड़हारा</button>
+                <button class="quick-action-btn" onclick="tellStory('hindi', 2)">दोस्ती की शक्ति</button>
+                <button class="quick-action-btn" onclick="tellStory('english', 0)">The Wise Farmer</button>
+                <button class="quick-action-btn" onclick="tellStory('english', 1)">Honest Woodcutter</button>
+                <button class="quick-action-btn" onclick="tellStory('english', 2)">Power of Friendship</button>
             </div>
-          </div>
         </div>
-
-        <div class="control-group">
-          <h3><i class="fas fa-magic"></i> क्विक एक्शन</h3>
-          <button class="action-btn" onclick="tellStory()">
-            <i class="fas fa-book"></i> कहानी सुनाएं
-          </button>
-          <button class="action-btn" onclick="saveChatAsPDF()">
-            <i class="fas fa-file-pdf"></i> PDF सेव करें
-          </button>
-          <button class="action-btn" onclick="addCustomQA()">
-            <i class="fas fa-plus"></i> नया Q&A जोड़ें
-          </button>
-          <button class="action-btn" onclick="openFeedbackForm()">
-            <i class="fas fa-comment"></i> फीडबैक दें
-          </button>
-          <button class="action-btn" onclick="toggleTheme()">
-            <i class="fas fa-palette"></i> थीम बदलें
-          </button>
-        </div>
-      </div>
-
-      <!-- Chat Area -->
-      <div class="chat-area">
-        <div id="listeningStatus">🎤 सुन रहा हूं...</div>
-        <div class="chat-box" id="chat">
-          <!-- Messages will appear here -->
-          <div class="message bot-message">
-            <div class="message-avatar bot-avatar">
-              <i class="fas fa-robot"></i>
-            </div>
-            <div class="message-content">
-              नमस्ते! मैं Tejas AI हूं। आपकी किस प्रकार सहायता कर सकता हूं?
-            </div>
-          </div>
-        </div>
-
-        <!-- Input Area -->
-        <div class="input-area">
-          <div class="input-wrapper">
-            <input type="text" id="userInput" placeholder="अपना संदेश यहाँ टाइप करें..." onkeydown="if(event.key==='Enter') sendMessage()">
-            <div class="input-icon" onclick="startListening()">
-              <i class="fas fa-microphone"></i>
-            </div>
-          </div>
-          <div class="action-buttons">
-            <button class="icon-btn" onclick="sendMessage()">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-      <b>For More GPTs Visit: <a href="https://sites.google.com/view/custom-gpt-store/home" target="_blank">GPT Store</a></b>
-    </div>
-  </div>
-
-  <script>
-    const qa = {
-      "hello": "नमस्ते! आपका दिन शुभ हो!",
-      "how are you": "मैं बिल्कुल ठीक हूं, धन्यवाद! आप कैसे हैं?",
-      "whats your name": "मेरा नाम तेजस है - मैं आपका AI सहायक हूं",
-      "bye": "अलविदा! आपसे बात करके अच्छा लगा",
-      "how made you": "मुझे बनाने वाले का नाम अमित धाकड़ है",
-      "thank you tejas": "तेजस खुश हुआ! आपका धन्यवाद",
-      "open google": "आप इस लिंक से Google खोल सकते हैं: https://www.google.com",
-      "url": "deepseek,grok,google,ngrok,ziphisher,chatgpt,ip lookup,ipaddress.my,mobile number infomation",
-      "deepseek": "https://chat.deepseek.com/",
-      "grok": "https://grok.com/",
-      "chatgpt": "https://chatgpt.com/",
-      "what is ai": "AI का मतलब है Artificial Intelligence - कृत्रिम बुद्धिमत्ता",
-    };
-
-    let customQA = JSON.parse(localStorage.getItem('customQA')) || {};
-    const stories = [
-      "एक समय की बात है, एक राजा था जो न्यायप्रिय था और अपनी प्रजा का बहुत ध्यान रखता था।",
-      "एक नन्ही चिड़िया रोज अपने बच्चों के लिए खाना लाती थी और उन्हें प्यार से पालती थी।",
-      "एक जंगल में सभी जानवर मिलकर त्योहार मनाते थे और खुशी से रहते थे।"
-    ];
-
-    const moodGIFs = {
-      happy: "https://media.giphy.com/media/yoJC2A59OCZHs1LXvW/giphy.gif",
-      sad: "https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif",
-      angry: "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif"
-    };
-
-    let selectedVoiceType = 'male';
-    let isDarkMode = false;
-
-    function sendMessage() {
-      const input = document.getElementById('userInput');
-      const chat = document.getElementById('chat');
-      const voiceToggle = document.getElementById('voiceToggle');
-      const mood = document.getElementById('mood').value;
-      const personality = document.getElementById('personality').value;
-      const userText = input.value.trim();
-      
-      if (!userText) return;
-
-      // Add user message
-      const userMessage = document.createElement('div');
-      userMessage.className = 'message user-message';
-      userMessage.innerHTML = `
-        <div class="message-content">${userText}</div>
-        <div class="message-avatar user-avatar">
-          <i class="fas fa-user"></i>
-        </div>
-      `;
-      chat.appendChild(userMessage);
-
-      // Generate bot response
-      let response = "माफ कीजिए, मैं समझ नहीं पाया। क्या आप दोबारा कह सकते हैं?";
-      
-      for (let q in qa) {
-        if (userText.toLowerCase().includes(q)) {
-          response = qa[q];
-          break;
-        }
-      }
-      
-      for (let q in customQA) {
-        if (userText.toLowerCase().includes(q)) {
-          response = customQA[q];
-          break;
-        }
-      }
-
-      // Apply personality
-      if (personality === 'friendly') response = `😊 ज़रूर! ${response}`;
-      if (personality === 'teacher') response = `📚 ध्यान से सुनिए... ${response}`;
-
-      // Apply mood
-      if (mood === 'happy') response = `😄 ${response}`;
-      else if (mood === 'sad') response = `😔 ${response}`;
-      else if (mood === 'angry') response = `😠 ${response}`;
-
-      // Add GIF if mood is selected
-      if (mood && moodGIFs[mood]) {
-        response += `<br><img src="${moodGIFs[mood]}" width="120" style="margin-top:8px;border-radius:10px;">`;
-      }
-
-      // Add bot message
-      setTimeout(() => {
-        const botMessage = document.createElement('div');
-        botMessage.className = 'message bot-message';
-        botMessage.innerHTML = `
-          <div class="message-avatar bot-avatar">
-            <i class="fas fa-robot"></i>
-          </div>
-          <div class="message-content">
-            ${response}
-            <div class="reactions">
-              <button class="reaction-btn" onclick="react('${response.replace(/'/g, "\\'")}','👍')">👍</button>
-              <button class="reaction-btn" onclick="react('${response.replace(/'/g, "\\'")}','👎')">👎</button>
-              <button class="reaction-btn" onclick="react('${response.replace(/'/g, "\\'")}','❤️')">❤️</button>
+    <div class="modal" id="jokesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Jokes / चुटकुले</div>
+                <button class="close-btn" onclick="closeModal('jokesModal')">×</button>
             </div>
-          </div>
-        `;
-        chat.appendChild(botMessage);
-        chat.scrollTop = chat.scrollHeight;
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="tellJoke('hindi', 0)">हिंदी चुटकुला 1</button>
+                <button class="quick-action-btn" onclick="tellJoke('hindi', 1)">हिंदी चुटकुला 2</button>
+                <button class="quick-action-btn" onclick="tellJoke('hindi', 2)">हिंदी चुटकुला 3</button>
+                <button class="quick-action-btn" onclick="tellJoke('english', 0)">English Joke 1</button>
+                <button class="quick-action-btn" onclick="tellJoke('english', 1)">English Joke 2</button>
+                <button class="quick-action-btn" onclick="tellJoke('english', 2)">English Joke 3</button>
+            </div>
+        </div>
+    </div>
 
-        // Speak if voice is enabled
-        if (voiceToggle.checked) {
-          speak(response.replace(/<[^>]*>/g, ""));
+    <div class="modal" id="motivationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Motivation / प्रेरणा</div>
+                <button class="close-btn" onclick="closeModal('motivationModal')">×</button>
+            </div>
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="getMotivation('hindi')">हिंदी प्रेरणा</button>
+                <button class="quick-action-btn" onclick="getMotivation('english')">English Motivation</button>
+                <button class="quick-action-btn" onclick="getRandomMotivation()">Random / यादृच्छिक</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Knowledge Base
+        const knowledgeBase = {
+            greetings: {
+                en: "Hello! I'm Tejas AI. You can speak to me or type. I understand both English and Hindi!",
+                hi: "नमस्ते! मैं तेजस एआई हूं। आप मुझसे बोल सकते हैं या टाइप कर सकते हैं। मैं अंग्रेजी और हिंदी दोनों समझता हूं!"
+            },
+            
+            stories: {
+                hindi: [
+                    "एक गाँव में एक किसान रहता था। एक बार उसके खेत में बहुत सारे तरबूज उगे। उसने सोचा कि शहर जाकर इन्हें बेचूंगा। रास्ते में एक नदी पड़ी। नदी पार करते समय कुछ तरबूज बह गए। किसान ने हार नहीं मानी और बचे हुए तरबूज बेचकर अच्छा पैसा कमाया। इस कहानी से हमें सीख मिलती है कि हार नहीं माननी चाहिए।",
+                    
+                    "एक लकड़हारा रोज जंगल से लकड़ियां काटकर लाता और बेचता। एक दिन उसकी कुल्हाड़ी नदी में गिर गई। वह रोने लगा। तभी एक देवता प्रकट हुए और सोने की कुल्हाड़ी लाकर दी। लकड़हारे ने कहा, 'यह मेरी नहीं है।' देवता ने उसकी ईमानदारी से खुश होकर तीनों कुल्हाड़ियां उसे दे दीं। ईमानदारी का फल हमेशा मीठा होता है।",
+                    
+                    "एक जंगल में खरगोश और कछुआ गहरे दोस्त थे। एक दिन बाघ ने खरगोश को पकड़ लिया। कछुआ धीरे-धीरे चलकर बाघ के पास पहुंचा और उसे समझाया। बाघ ने खरगोश को छोड़ दिया। इससे पता चलता है कि दोस्ती में कोई कमजोरी नहीं होती, बल्कि अलग-अलग गुण होते हैं जो मिलकर काम आते हैं।"
+                ],
+                english: [
+                    "In a village lived a farmer. One season, his field produced many watermelons. He decided to sell them in the city. On the way, he had to cross a river. While crossing, some watermelons fell into the river. The farmer didn't give up and sold the remaining watermelons to earn good money. This story teaches us never to give up.",
+                    
+                    "A woodcutter would cut wood from the forest daily and sell it. One day, his axe fell into the river. He started crying. Suddenly, a god appeared and brought a golden axe. The woodcutter said, 'This is not mine.' Pleased with his honesty, the god gave him all three axes. Honesty is always rewarded.",
+                    
+                    "In a forest, a rabbit and a turtle were best friends. One day, a tiger caught the rabbit. The turtle slowly reached the tiger and convinced him to let the rabbit go. This shows that friendship has different qualities that work together when needed."
+                ]
+            },
+            
+            jokes: {
+                hindi: [
+                    "टीचर: 'बच्चों, 2 और 2 कितने होते हैं?' स्टूडेंट: '4!' टीचर: 'बहुत अच्छा! और 2 और 2 नहीं होते तो?' स्टूडेंट: 'फिर तो मेरे मार्क्स कम आते!'",
+                    
+                    "पापा: 'बेटा, तुम्हारी आँखें इतनी लाल क्यों हैं?' बेटा: 'पापा, मैंने सुना है कि रात में पढ़ने से आँखें खराब हो जाती हैं, इसलिए मैं दिन में पढ़ता हूं!' पापा: 'तो फिर लाल क्यों हैं?' बेटा: 'दिन में सोने से!'",
+                    
+                    "एक आदमी डॉक्टर के पास गया: 'डॉक्टर साहब, मुझे याददाश्त की problem है।' डॉक्टर ने पूछा: 'कब से?' आदमी बोला: 'कब से क्या?'"
+                ],
+                english: [
+                    "Teacher: 'Children, how much is 2+2?' Student: '4!' Teacher: 'Very good! And if it wasn't 2+2?' Student: 'Then my marks would be less!'",
+                    
+                    "Father: 'Son, why are your eyes so red?' Son: 'Dad, I heard that studying at night spoils eyes, so I study during the day!' Father: 'Then why are they red?' Son: 'From sleeping during the day!'",
+                    
+                    "A man went to the doctor: 'Doctor, I have a memory problem.' Doctor asked: 'Since when?' Man said: 'Since when what?'"
+                ]
+            },
+            
+            motivation: {
+                hindi: [
+                    "सफलता उन्हीं को मिलती है जो कठिनाइयों से घबराते नहीं, बल्कि उनका सामना करते हैं!",
+                    "जीवन में कभी हार मत मानो, क्योंकि बारिश के बाद ही इंद्रधनुष दिखता है!",
+                    "मेहनत करो, सपने देखो, और विश्वास रखो - सफलता जरूर मिलेगी!"
+                ],
+                english: [
+                    "Success comes to those who don't fear difficulties but face them!",
+                    "Never give up in life, because rainbow appears only after rain!",
+                    "Work hard, dream big, and keep faith - success will definitely come!"
+                ]
+            }
+        };
+
+        let isListening = false;
+        let voiceEnabled = true;
+        let recognition;
+        let currentLanguage = 'en';
+
+        // Initialize
+        window.addEventListener('load', function() {
+            initializeSpeechRecognition();
+            addMessage(knowledgeBase.greetings.en, 'bot', true);
+        });
+
+        function initializeSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = function() {
+                    isListening = true;
+                    document.getElementById('voiceButton').classList.add('listening');
+                    document.getElementById('listeningStatus').style.display = 'block';
+                };
+
+                recognition.onresult = function(event) {
+                    const speechResult = event.results[0][0].transcript;
+                    document.getElementById('userInput').value = speechResult;
+                    detectLanguage(speechResult);
+                    sendMessage();
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    stopListening();
+                };
+
+                recognition.onend = function() {
+                    stopListening();
+                };
+            } else {
+                alert("Speech recognition not supported in this browser. Please use Chrome or Edge.");
+            }
         }
-      }, 1000);
 
-      input.value = "";
-    }
+        function detectLanguage(text) {
+            const hindiRegex = /[\u0900-\u097F]/;
+            currentLanguage = hindiRegex.test(text) ? 'hi' : 'en';
+        }
 
-    function speak(text) {
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = 'hi-IN';
-      const voices = speechSynthesis.getVoices();
-      const selectedVoice = voices.find(v =>
-        v.lang === 'hi-IN' &&
-        v.name.toLowerCase().includes(selectedVoiceType)
-      );
-      if (selectedVoice) msg.voice = selectedVoice;
-      msg.rate = 0.95;
-      speechSynthesis.speak(msg);
-    }
+        function toggleListening() {
+            if (!isListening) {
+                startListening();
+            } else {
+                stopListening();
+            }
+        }
 
-    function setVoice(type) {
-      selectedVoiceType = type;
-      document.querySelectorAll('.voice-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-    }
+        function startListening() {
+            if (recognition) {
+                recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+                recognition.start();
+            }
+        }
 
-    function startListening() {
-      const status = document.getElementById('listeningStatus');
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'hi-IN';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      status.style.display = 'block';
-      
-      recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript;
-        document.getElementById('userInput').value = speechResult;
-        status.style.display = 'none';
-      };
-      
-      recognition.onerror = function() {
-        status.style.display = 'none';
-        alert("माइक त्रुटि, कृपया पुनः प्रयास करें");
-      };
-      
-      recognition.onend = () => status.style.display = 'none';
-      recognition.start();
-    }
+        function stopListening() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isListening = false;
+            document.getElementById('voiceButton').classList.remove('listening');
+            document.getElementById('listeningStatus').style.display = 'none';
+        }
 
-    function toggleTheme() {
-      document.body.style.background = isDarkMode 
-        ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
-        : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-      isDarkMode = !isDarkMode;
-    }
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const userText = input.value.trim();
+            
+            if (!userText) return;
 
-    function tellStory() {
-      const story = stories[Math.floor(Math.random() * stories.length)];
-      const chat = document.getElementById('chat');
-      const botMessage = document.createElement('div');
-      botMessage.className = 'message bot-message';
-      botMessage.innerHTML = `
-        <div class="message-avatar bot-avatar">
-          <i class="fas fa-robot"></i>
-        </div>
-        <div class="message-content">
-          📖 ${story}
-        </div>
-      `;
-      chat.appendChild(botMessage);
-      chat.scrollTop = chat.scrollHeight;
-      speak(story);
-    }
+            // Add user message
+            addMessage(userText, 'user');
+            
+            // Detect language from user input
+            detectLanguage(userText);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Generate response after delay
+            setTimeout(() => {
+                const response = generateResponse(userText);
+                addMessage(response, 'bot', true);
+            }, 1000);
 
-    function react(response, emoji) {
-      alert(`आपने प्रतिक्रिया दी ${emoji}:\n"${response}"`);
-    }
+            input.value = "";
+        }
 
-    function saveChatAsPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const chatText = document.getElementById('chat').innerText;
-      doc.text(chatText, 10, 10);
-      doc.save('tejas_chat.pdf');
-    }
+        function generateResponse(userInput) {
+            const userText = userInput.toLowerCase();
+            
+            // Simple response logic - can be expanded
+            if (userText.includes('hello') || userText.includes('hi') || userText.includes('नमस्ते') || userText.includes('हैलो')) {
+                return currentLanguage === 'hi' ? 
+                    "नमस्ते! मैं तेजस एआई हूं। आप मुझसे बोल सकते हैं या टाइप कर सकते हैं।" :
+                    "Hello! I'm Tejas AI. You can speak to me or type.";
+            }
+            
+            if (userText.includes('story') || userText.includes('कहानी')) {
+                return currentLanguage === 'hi' ?
+                    "मैं आपको एक अच्छी कहानी सुनाना चाहूंगा! ⋯ मेनू से कहानी चुनें।" :
+                    "I'd love to tell you a good story! Choose a story from the ⋯ menu.";
+            }
+            
+            if (userText.includes('joke') || userText.includes('चुटकुला')) {
+                return currentLanguage === 'hi' ?
+                    "हंसी के लिए तैयार? ⋯ मेनू से चुटकुला चुनें!" :
+                    "Ready for laughter? Choose a joke from the ⋯ menu!";
+            }
+            
+            // Default response
+            return currentLanguage === 'hi' ?
+                "मैं आपकी मदद कैसे कर सकता हूं? आप ⋯ मेनू से स्टोरी, जोक्स या मोटिवेशन चुन सकते हैं!" :
+                "How can I help you? You can choose stories, jokes or motivation from the ⋯ menu!";
+        }
 
-    function addCustomQA() {
-      const q = prompt("अपना सवाल लिखिए:");
-      const a = prompt("इसका जवाब क्या होना चाहिए?");
-      if (q && a) {
-        customQA[q.toLowerCase()] = a;
-        localStorage.setItem('customQA', JSON.stringify(customQA));
-        alert("Custom Q&A जोड़ा गया ✅");
-      }
-    }
+        function addMessage(content, role, speak = false) {
+            const chat = document.getElementById('chat');
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            
+            if (role === 'user') {
+                chat.innerHTML += `
+                    <div class="message user-message">
+                        <div class="message-content">${content}</div>
+                        <div class="message-avatar user-avatar">👤</div>
+                    </div>
+                `;
+            } else {
+                chat.innerHTML += `
+                    <div class="message bot-message">
+                        <div class="message-avatar bot-avatar">🤖</div>
+                        <div class="message-content">${content}</div>
+                    </div>
+                `;
+                
+                // Speak the response if voice is enabled
+                if (speak && voiceEnabled) {
+                    speakText(content);
+                }
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
 
-    function openFeedbackForm() {
-      const feedback = prompt("कृपया अपना सुझाव या फीडबैक दें:");
-      if (feedback) {
-        const time = new Date().toLocaleString();
-        localStorage.setItem("feedback_" + time, feedback);
-        alert("धन्यवाद! आपका फीडबैक सेव किया गया है ✅");
-      }
-    }
+        function showTypingIndicator() {
+            const chat = document.getElementById('chat');
+            chat.innerHTML += `
+                <div class="message bot-message" id="typingIndicator">
+                    <div class="message-avatar bot-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+        }
 
-    // Initialize voice buttons and set male as default
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('maleVoiceBtn').classList.add('active');
-      document.getElementById('maleVoiceBtn').addEventListener('click', function() { setVoice('male'); });
-      document.getElementById('femaleVoiceBtn').addEventListener('click', function() { setVoice('female'); });
-    });
+        function speakText(text) {
+            // Remove emojis and special characters for cleaner speech
+            const cleanText = text.replace(/[^\w\s\u0900-\u097F.,!?;]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
 
-    window.speechSynthesis.onvoiceschanged = () => {};
-  </script>
+        // Menu Functions
+        function toggleMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('show');
+        }
+
+        function showStories() {
+            closeAllModals();
+            document.getElementById('storiesModal').classList.add('show');
+            toggleMenu();
+        }
+
+        function showJokes() {
+            closeAllModals();
+            document.getElementById('jokesModal').classList.add('show');
+            toggleMenu();
+        }
+
+        function showMotivation() {
+            closeAllModals();
+            document.getElementById('motivationModal').classList.add('show');
+            toggleMenu();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+            });
+        }
+
+        // Content Functions
+        function tellStory(language, index) {
+            const story = knowledgeBase.stories[language][index];
+            const title = language === 'hindi' ? 
+                ['बुद्धिमान किसान', 'ईमानदार लकड़हारा', 'दोस्ती की शक्ति'][index] :
+                ['The Wise Farmer', 'Honest Woodcutter', 'Power of Friendship'][index];
+            
+            addMessage(`📖 ${title}\n\n${story}`, 'bot', true);
+            closeModal('storiesModal');
+        }
+
+        function tellJoke(language, index) {
+            const joke = knowledgeBase.jokes[language][index];
+            addMessage(`😂 ${joke}`, 'bot', true);
+            closeModal('jokesModal');
+        }
+
+        function getMotivation(language) {
+            const quotes = knowledgeBase.motivation[language];
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            addMessage(`💫 ${randomQuote}`, 'bot', true);
+            closeModal('motivationModal');
+        }
+
+        function getRandomMotivation() {
+            const allQuotes = [...knowledgeBase.motivation.hindi, ...knowledgeBase.motivation.english];
+            const randomQuote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
+            addMessage(`💫 ${randomQuote}`, 'bot', true);
+            closeModal('motivationModal');
+        }
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            document.getElementById('voiceStatus').textContent = voiceEnabled ? 'Voice On' : 'Voice Off';
+            toggleMenu();
+            
+            // Give feedback
+            const feedback = voiceEnabled ? 
+                (currentLanguage === 'hi' ? "आवाज चालू हो गई है!" : "Voice turned on!") :
+                (currentLanguage === 'hi' ? "आवाज बंद हो गई है!" : "Voice turned off!");
+            
+            addMessage(feedback, 'bot', false);
+        }
+
+        function saveChatAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const chatText = document.getElementById('chat').innerText;
+            doc.text(chatText, 10, 10);
+            doc.save('tejas_chat.pdf');
+            addMessage(currentLanguage === 'hi' ? 
+                "✅ चैट PDF के रूप में सेव हो गई!" : 
+                "✅ Chat saved as PDF!", 'bot');
+            toggleMenu();
+        }
+
+        function clearChat() {
+            document.getElementById('chat').innerHTML = `
+                <div class="message bot-message">
+                    <div class="message-avatar bot-avatar">🤖</div>
+                    <div class="message-content">
+                        ${currentLanguage === 'hi' ? 
+                            "चैट साफ हो गई! मैं आपकी कैसे मदद कर सकता हूं?" : 
+                            "Chat cleared! How can I help you today?"}
+                    </div>
+                </div>
+            `;
+            toggleMenu();
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const menuBtn = document.querySelector('.menu-btn');
+            
+            if (!menu.contains(event.target) && !menuBtn.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
